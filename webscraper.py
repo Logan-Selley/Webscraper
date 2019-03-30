@@ -48,7 +48,7 @@ def scrape(url, tag, tag2, css, css2):
     else:
         response = requests.get(url.get(), timeout=5)
         content = BeautifulSoup(response.text, "html.parser")
-        print(str(content.find_all("button")))
+        print(str(content.find_all("button", id_="readable")))
         Arr = {}
         secondaryTags = tag2.get().split(" ")
         secondaryCSS = css2.get().split(" ")
@@ -59,10 +59,15 @@ def scrape(url, tag, tag2, css, css2):
             while len(secondaryTags) != len(secondaryCSS):
                 del secondaryCSS[-1]
         if tag.get() == "":
-            Arr['html'] = content.text
+            if css.get() != "":
+                Arr['class'] = content.find(class_=css.get()).text
+            else:
+                Arr['html'] = content.text
         else:
+            Arr['data'] = []
             if css.get() == "":
                 for item in content.find_all(tag.get()):
+                    print(item.text)
                     if not secondaryTags:
                         if secondaryCSS:
                             # tags and css
@@ -75,7 +80,6 @@ def scrape(url, tag, tag2, css, css2):
                                 Arr[secondaryTags[position].text] = item.find(secondaryTags[position]).text
                             
                     else:
-                        Arr['data'] = []
                         Arr['data'].append(item.text)
                     
             else:
@@ -92,7 +96,6 @@ def scrape(url, tag, tag2, css, css2):
                                 Arr[secondaryTags[position].text] = item.find(secondaryTags[position]).text
                             
                     else:
-                        Arr['data'] = []
                         Arr['data'].append(item.text)
         print(Arr)
         with open('data.json', 'w') as outfile:
